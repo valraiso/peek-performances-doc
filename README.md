@@ -1,156 +1,233 @@
+# Guide d’intégration des ventes dans PeekPerformances
 
-Guide d’intégration des ventes dans PeekPerformances
+![peekperformances](./peekperformances.png)
 
-Système de remontée de données de navigation et de réconciliation avec les données de vente
+## Système de remontée de données de navigation et de réconciliation avec les données de vente
+
+![architecture](./archi.png)
 
 À chaque étape de la navigation du visiteur, des événements sont remontés à plausible.
 
-Détail des événements remontés à Plausible
-Intégration Plausible
+## Détail des événements remontés à Plausible
+
+### Intégration Plausible
+
 Il existe plusieurs modes d’intégration (package npm, modules prestashop etc.) disponibles, facilitant et optimisant l’intégration du script plausible : https://plausible.io/docs/integration-guides#prestashop
 
-page_view Plausible
+### page_view Plausible
+
 Pas besoin de configurer un événement spécifique. Ce sont les visiteurs uniques du site.
-Note: Plausible est en train d’intégrer la possibilité d’ajouter des propriétés personnalisées aux page views, ce qui permettra à terme de remonter la catégorie du produit sur les pages concernées, permettant d’ajouter une étape “Visiteurs pages catégorie de produits”. (ref: https://github.com/plausible/analytics/issues/134)
 
-Campagnes de pubs: Plausible
+**Note**: Plausible est en train d’intégrer la possibilité d’ajouter des propriétés personnalisées aux page views, ce qui permettra à terme de remonter la catégorie du produit sur les pages concernées, permettant d’ajouter une étape "Visiteurs pages catégorie de produits". (ref: https://github.com/plausible/analytics/issues/134)
+
+### Campagnes de pubs: Plausible
+
 Pas besoin de configurer un événement spécifique. Les informations sont récupérées automatiquement dans Plausible.
-Intégration: Afin de préciser à Plausible que certains utilisateurs sont arrivés via un adsense, il faut passer certains arguments dans l’url de la page.
+**Intégration**: Afin de préciser à Plausible que certains utilisateurs sont arrivés via un adsense, il faut passer certains arguments dans l’url de la page.
 https://plausible.io/docs/manual-link-tagging
-https://my_domain/?source=Sea&utm_campaign={campaign_name}
-La source Sea permet de déterminer l’ensemble des utilisateurs venant via un adsense et le nom de la campagne sert à filtrer les données pour étudier les performances de ladite campagne de pub. 
-Seuls ces paramètres sont essentiels. Cela ne vous empêche pas d’en rajouter d’autres, ils ne seront pas pris en compte.
-Événements : Plausible Goals
-Les événements suivants sont, dans la terminologie plausible, des “goals”. Vous trouverez la manière d’envoyer de tels événements dans la documentation plausible ici: https://plausible.io/docs/custom-event-goals
-Dans les descriptions d’événements ci-dessous, seules les propriétés nécessaires au bon fonctionnement du suivi des ventes a été documenté. Il est possible et même souvent recommandé d’enrichir ces événements d’autres propriétés pour enrichir la classification dans le dashboard plausible.
-Exemple pour l’événement View Item
 
-ou pour le Checkout Process
+```
+https://my_domain/?source=Sea&utm_campaign={campaign_name}
+```
+
+La source _Sea_ permet de déterminer l’ensemble des utilisateurs venant via un adsense et le nom de la campagne sert à filtrer les données pour étudier les performances de ladite campagne de pub.
+**Seuls ces paramètres sont essentiels. Cela ne vous empêche pas d’en rajouter d’autres, ils ne seront pas pris en compte.**
+
+### Événements : Plausible Goals
+
+Les événements suivants sont, dans la terminologie plausible, des "goals". Vous trouverez la manière d’envoyer de tels événements dans la documentation plausible ici: https://plausible.io/docs/custom-event-goals
+
+**Dans les descriptions d’événements ci-dessous, seules les propriétés nécessaires au bon fonctionnement du suivi des ventes a été documenté. <span style='color:red'>Il est possible et même souvent recommandé</span> d’enrichir ces événements d’autres propriétés pour enrichir la classification dans le dashboard plausible.**
+
+Pour vérifier la bonne réception des propriétés dans Plausible, dans le dernier volet
+![customProps](./custom_props.png)
+
+Vue des Golas dans Plausible
+![goals](./goals.png)
 
 L’ensemble de ces goals doit remonter une propriété commune sous la forme d’un JSON stringify. Cette propriété comporte une liste de produits comprenant catégorie, sous-catégorie, marchand et prix. Ceci vous permet de filtrer vos données de vente par l’ensemble de ces éléments.
-Dans le cas où l’un de ces filtres ne vous intéresse pas, vous pouvez renvoyer un nom commun à l’ensemble de vos produits pour ne pas altérer le bon fonctionnement de l’outil.
+
+**Dans le cas où l’un de ces filtres ne vous intéresse pas, vous pouvez renvoyer un nom commun à l’ensemble de vos produits pour ne pas altérer le bon fonctionnement de l’outil.**
+
 A ce produit peut s’ajouter d’autres propriétés comme détaillé ci-dessous.
-Commun à tous les événements : Tracking des revenus dans Plausible
-Pour permettre d’avoir des données de revenus directement dans Plausible, il suffit d’ajouter dans chaque événement un attribut “revenue” avec les deux propriétés “currency” et “amount”, pour remonter le montant total concerné par l’événement. Ci-dessous un exemple. Cette partie est optionnelle pour peekPerformance, mais constitue un ajout complémentaire intéressant dans le dashboard Plausible. Dans la suite, cette propriété a été incluse dans toutes les descriptions d’événements.
 
-plausible("<Nom de l’événement>",{
-props: {
-[...<données de l’événement]
-},
-revenue: {currency: "EUR", amount: 13}
-)
+### Commun à tous les événements : Tracking des revenus dans Plausible
 
-PeekPerformances: View item
-Cet événement est déclenché à l’affichage d’un produit donné. Dans le cas où plusieurs produits sont affichés, ils peuvent tous être remontés sous la forme d’une liste de produits. Ici, ajouter l’attribut revenue n’a pas forcément de sens car il peut y avoir plusieurs produits sans action concrète de volonté d’achat
-Exemple:
-plausible("PeekPerformances: View item",{
-props: {
-rawData: {
-	products:[{
-category: “Nourriture pour chats”,
-subCategory: “Croquettes”,
-merchant: “Marchand”,
-price: 13
-}],
-}
-}
+Pour permettre d’avoir des données de revenus directement dans Plausible, il suffit d’ajouter dans chaque événement un attribut `revenue` avec les deux propriétés `currency` et `amount`, pour remonter le montant total concerné par l’événement. Ci-dessous un exemple. Cette partie est optionnelle pour peekPerformance, mais constitue un ajout complémentaire intéressant dans le dashboard Plausible. Dans la suite, cette propriété a été incluse dans toutes les descriptions d’événements.
+
+```javascript
+plausible("<Nom de l’événement>", {
+  props: {
+    //...<données de l’événement>
+  },
+  revenue: { currency: "EUR", amount: 13 },
 });
-PeekPerformances: Add to cart
-Cet événement est déclenché à l’ajout d’un produit au panier.
-Exemple:
-plausible("PeekPerformances: Add to cart",{
-props: {
-rawData: {
-	products:[{
-category: “Nourriture pour chats”,
-subCategory: “Croquettes”,
-merchant: “Marchand”,
-price: 13
-}],
-}
-},
-revenue: {currency: "EUR", amount: 13}
-});
-PeekPerformances: Begin checkout
-Cet événement est déclenché au début du processus de validation de la commande : l’utilisateur clique sur le bouton “valider la commande”. Pour cet évènement et les prochains, la propriété products correspond aux éléments du panier.
-Exemple:
-plausible("PeekPerformances: Begin checkout",{
-props: {
-rawData: {
-	products:[
-{
-category: “Nourriture pour chats”,
-subCategory: “Croquettes”,
-merchant: “Marchand”,
-price: 13
-},
-{
-category: “Jouets pour chats”,
-merchant: “Marchand”,
-price: 14
-}
-],
-},
-revenue: {currency: "EUR", amount: 27}
-});
-PeekPerformances: Checkout process
-Cet événement est déclenché quand l’utilisateur choisit un mode de paiement et est redirigé vers la plateforme de paiement. 
-Exemple:
+```
+
+### PeekPerformances: View item
+
+Cet événement est déclenché à l’affichage d’un produit donné. Dans le cas où plusieurs produits sont affichés, ils peuvent tous être remontés sous la forme d’une liste de produits. Ici, ajouter l’attribut revenue n’a pas forcément de sens car il peut y avoir plusieurs produits sans action concrète de volonté d’achat.
+
+###### Exemple
+
+```javascript
 const rawData = {
-products:[{
-category: “Nourriture pour chats”,
-subCategory: “Croquettes”,
-merchant: “Marchand”,
-price: 13
-}],
-}
-plausible("PeekPerformances: Checkout process",{
-props: {
-rawData: JSON.stringify(rawData)
-},
-revenue: {currency: "EUR", amount: 13}
+  products: [
+    {
+      category: "Nourriture pour chats",
+      subCategory: "Croquettes",
+      merchant: "Marchand",
+      price: 13,
+    },
+  ],
+};
+plausible("PeekPerformances: View item", {
+  props: {
+    rawData: JSON.stringify(rawData),
+  },
 });
-PeekPerformances: Payment success
+```
+
+### PeekPerformances: Add to cart
+
+Cet événement est déclenché à l’ajout d’un produit au panier.
+
+###### Exemple
+
+```javascript
+const rawData = {
+  products: [
+    {
+      category: "Nourriture pour chats",
+      subCategory: "Croquettes",
+      merchant: "Marchand",
+      price: 13,
+    },
+  ],
+};
+plausible("PeekPerformances: Add to cart", {
+  props: {
+    rawData: JSON.stringify(rawData),
+  },
+  revenue: { currency: "EUR", amount: 13 },
+});
+```
+
+### PeekPerformances: Begin checkout
+
+Cet événement est déclenché au début du processus de validation de la commande : l’utilisateur clique sur le bouton "valider la commande". Pour cet évènement et les prochains, la propriété products correspond aux éléments du panier.
+
+###### Exemple
+
+```javascript
+const rawData = {
+  products: [
+    {
+      category: "Nourriture pour chats",
+      subCategory: "Croquettes",
+      merchant: "Marchand",
+      price: 13,
+    },
+    {
+      category: "Jouets pour chats",
+      merchant: "Marchand",
+      price: 14,
+    },
+  ],
+};
+plausible("PeekPerformances: Begin checkout", {
+  props: {
+    rawData: JSON.stringify(rawData),
+    revenue: { currency: "EUR", amount: 27 },
+  },
+});
+```
+
+### PeekPerformances: Checkout process
+
+Cet événement est déclenché quand l’utilisateur choisit un mode de paiement et est redirigé vers la plateforme de paiement.
+
+###### Exemple
+
+```javascript
+const rawData = {
+  products: [
+    {
+      category: "Nourriture pour chats",
+      subCategory: "Croquettes",
+      merchant: "Marchand",
+      price: 13,
+    },
+  ],
+};
+plausible("PeekPerformances: Checkout process", {
+  props: {
+    rawData: JSON.stringify(rawData),
+  },
+  revenue: { currency: "EUR", amount: 13 },
+});
+```
+
+### PeekPerformances: Payment success
+
 Cet événement est déclenché une fois le paiement validé et l’utilisateur redirigé vers la page de confirmation de commande du marchand. On y retrouve le nombre d’essais avant que le paiement ait réussi ainsi que la méthode de paiement.
-Exemple:
-plausible("PeekPerformances: Payment success",{
-props: {
-rawData: {
-	products:[{
-category: “Nourriture pour chats”,
-subCategory: “Croquettes”,
-merchant: “Marchand”,
-price: 13
-}],
-attempts: 2,
-paymentMethod: “Carte bancaire”,
-},
-revenue: {currency: "EUR", amount: 13}
-}
-})
-PeekPerformances: Payment failure
+
+###### Exemple
+
+```javascript
+const rawData = {
+  products: [
+    {
+      category: "Nourriture pour chats",
+      subCategory: "Croquettes",
+      merchant: "Marchand",
+      price: 13,
+    },
+  ],
+  attempts: 2,
+  paymentMethod: "Carte bancaire",
+};
+plausible("PeekPerformances: Payment success", {
+  props: {
+    rawData: JSON.stringify(rawData),
+    revenue: { currency: "EUR", amount: 13 },
+  },
+});
+```
+
+### PeekPerformances: Payment failure
+
 Cet événement est déclenché en cas d’échec de paiement, qui peut avoir plusieurs raisons possibles.
 En plus, le code de retour du paiement doit être ajouté, utilisé pour donner le détails de raisons d’échec.
 
-Exemple:
-plausible("PeekPerformances: Payment failure",{
-props: {
-rawData: {
-	products:[{
-category: “Nourriture pour chats”,
-subCategory: “Croquettes”,
-merchant: “Marchand”,
-price: 13
-}],
-attempts: 2,
-execCode: 4003,
-},
-revenue: {currency: "EUR", amount: 13}
-}
-})
+![paymentFailure](./failures.png)
+
+###### Exemple
+
+```javascript
+const rawData = {
+  products: [
+    {
+      category: "Nourriture pour chats",
+      subCategory: "Croquettes",
+      merchant: "Marchand",
+      price: 13,
+    },
+  ],
+  attempts: 2,
+  execCode: 4003,
+};
+plausible("PeekPerformances: Payment failure", {
+  props: {
+    rawData: JSON.stringify(rawData),
+    revenue: { currency: "EUR", amount: 13 },
+  },
+});
+```
 
 La liste des codes d’erreurs à renvoyer en fonction de la raison de l’échec est la suivante (la liste peut varier en fonction du prestataire de paiement, si différent, il est possible d’intégrer une nouvelle liste de codes) :
 
+```javascript
 const ERRORCODEFR = {
   "0000": "Successful operation",
   "0001": "3-D Secure authentication required",
@@ -219,5 +296,5 @@ const ERRORCODEFR = {
   6005: "Carte non enregistrée ou 3-D secure indisponible",
   6006: "Méthode de paiement bloquée",
   6007: "Opération interdite par le réseau bancaire",
-}
-
+};
+```
