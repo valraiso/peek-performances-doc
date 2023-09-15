@@ -138,8 +138,8 @@ const rawData = {
 plausible("PeekPerformances: Begin checkout", {
   props: {
     rawData: JSON.stringify(rawData),
-    revenue: { currency: "EUR", amount: 27 },
   },
+  revenue: { currency: "EUR", amount: 27 },
 });
 ```
 
@@ -190,8 +190,8 @@ const rawData = {
 plausible("PeekPerformances: Payment success", {
   props: {
     rawData: JSON.stringify(rawData),
-    revenue: { currency: "EUR", amount: 13 },
   },
+  revenue: { currency: "EUR", amount: 13 },
 });
 ```
 
