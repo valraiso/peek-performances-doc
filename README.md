@@ -42,7 +42,7 @@ Les événements suivants sont, dans la terminologie plausible, des "goals". Vou
 Pour vérifier la bonne réception des propriétés dans Plausible, dans le dernier volet
 ![customProps](./custom_props.png)
 
-Vue des Golas dans Plausible
+Vue des Goals dans Plausible
 ![goals](./goals.png)
 
 L’ensemble de ces goals doit remonter une propriété commune sous la forme d’un JSON stringify. Cette propriété comporte une liste de produits comprenant catégorie, sous-catégorie, marchand et prix. Ceci vous permet de filtrer vos données de vente par l’ensemble de ces éléments.
