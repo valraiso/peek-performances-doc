@@ -220,8 +220,8 @@ const rawData = {
 plausible("PeekPerformances: Payment failure", {
   props: {
     rawData: JSON.stringify(rawData),
-    revenue: { currency: "EUR", amount: 13 },
   },
+  revenue: { currency: "EUR", amount: 13 },
 });
 ```
 
